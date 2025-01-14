@@ -1,0 +1,10 @@
+defineCMacro no longer exists:
+-- blah.defineCMacro(..., null);
+++ blah.root_module.addCMacro(..., "");
+
+one of the other dependencies has a ** that should be a single *, just remove the &
+-- foo(&val);
+++ foo(val);
+
+our build.zig specifies the linux backend in the options for raylib cuz I'm not running wayland, and the
+default for raylib is to build for both for who knows what reason.

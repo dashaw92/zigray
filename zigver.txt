@@ -1,0 +1,2 @@
+zigray ➜ zig version
+0.14.0-dev.2613+0bf44c309
