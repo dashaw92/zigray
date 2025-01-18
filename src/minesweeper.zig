@@ -116,7 +116,9 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
                 .flag => {
                     switch (cell.*) {
                         .mine => |*mine| mine.* = !mine.*,
-                        .empty => |*empty| empty.flagged = !empty.flagged,
+                        .empty => |*empty| {
+                            if (cell.isHidden()) empty.flagged = !empty.flagged;
+                        },
                     }
                     return .success;
                 },
