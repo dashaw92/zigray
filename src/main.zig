@@ -3,7 +3,7 @@ const r = @cImport(@cInclude("raylib.h"));
 const mines = @import("minesweeper.zig");
 
 pub fn main() !void {
-    var game = mines.Minesweeper(9, 9).init();
+    var game = mines.Minesweeper(18, 18).init();
     const win_width: c_int = @intCast((game.width - 1) * 40 + 70);
     const win_height: c_int = @intCast((game.height - 1) * 40 + 70);
 
@@ -73,8 +73,8 @@ fn renderButton(x: usize, y: usize, hidden: bool) void {
 fn interactGame(game: anytype) !mines.MoveResult {
     const mX = r.GetMouseX();
     const mY = r.GetMouseY();
-    const left = r.IsMouseButtonPressed(r.MOUSE_BUTTON_LEFT);
-    const right = r.IsMouseButtonPressed(r.MOUSE_BUTTON_RIGHT);
+    const left = r.IsMouseButtonReleased(r.MOUSE_BUTTON_LEFT);
+    const right = r.IsMouseButtonReleased(r.MOUSE_BUTTON_RIGHT);
 
     // Nothing to do if no buttons were pressed
     if (!left and !right) return undefined;

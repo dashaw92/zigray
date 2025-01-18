@@ -140,15 +140,14 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
 
                                 // floodfill nearby cells to expose all until
                                 // all trivial cells are exposed.
-                                // TODO Why the fuck does this crash without "* 100"
-                                var queue = Fifo(Point, .{ .Static = _width * _height * 100 }).init();
+                                var queue = Fifo(Point, .{ .Static = _width * _height }).init();
                                 defer queue.deinit();
 
                                 try queue.writeItem(move.position());
+                                cell.setVisited(true);
                                 while (queue.count != 0) {
                                     const pos = queue.readItem().?;
-                                    var currentCell: *Cell = &self.cells[pos.y * self.width + pos.x];
-                                    currentCell.setVisited(true);
+                                    var currentCell = &self.cells[pos.y * self.width + pos.x];
 
                                     if (!currentCell.isEmpty()) continue;
                                     currentCell.setHidden(false);
@@ -157,8 +156,9 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
                                     for (neighbors(pos.x, pos.y)) |neighbor| {
                                         if (neighbor == null) continue;
                                         if (!self.inBounds(&neighbor.?)) continue;
-                                        const neighborCell = self.cells[neighbor.?.y * self.width + neighbor.?.x];
+                                        const neighborCell = &self.cells[neighbor.?.y * self.width + neighbor.?.x];
                                         if (neighborCell.isVisited()) continue;
+                                        neighborCell.setVisited(true);
 
                                         try queue.writeItem(neighbor.?);
                                     }
