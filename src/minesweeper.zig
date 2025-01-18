@@ -23,6 +23,7 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
                 .rng = rng,
             };
 
+            @setEvalBranchQuota(5000);
             inline for (self.cells, 0..) |_, i| {
                 self.cells[i] = Cell{ .empty = .{} };
             }
@@ -31,6 +32,7 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
         }
 
         pub fn reset(self: *Self) void {
+            @setEvalBranchQuota(5000);
             inline for (self.cells, 0..) |_, i| {
                 self.cells[i] = Cell{ .empty = .{} };
             }

@@ -2,10 +2,16 @@ const std = @import("std");
 const r = @cImport(@cInclude("raylib.h"));
 const mines = @import("minesweeper.zig");
 
+const WIDTH = 32;
+const HEIGHT = 32;
+const BIG = WIDTH >= 20 and HEIGHT >= 20;
+const CELL_SIZE = if (BIG) 20 else 30;
+const TEXT_SIZE = if (BIG) 14 else 24;
+
 pub fn main() !void {
-    var game = mines.Minesweeper(18, 18).init();
-    const win_width: c_int = @intCast((game.width - 1) * 40 + 70);
-    const win_height: c_int = @intCast((game.height - 1) * 40 + 70);
+    var game = mines.Minesweeper(WIDTH, HEIGHT).init();
+    const win_width: c_int = @intCast(game.width * (CELL_SIZE + 10) + 30);
+    const win_height: c_int = @intCast(game.height * (CELL_SIZE + 10) + 30);
 
     r.InitWindow(win_width, win_height, "Minesweeper");
     r.SetTargetFPS(144);
@@ -33,8 +39,8 @@ fn renderGame(game: anytype) void {
     rect(5, 5, r.GetScreenWidth() - 10, r.GetScreenHeight() - 10, 3, r.BLACK, r.DARKGRAY);
     for (0..game.height) |y| {
         for (0..game.width) |x| {
-            const localX = 20 + 40 * x;
-            const localY = 20 + 40 * y;
+            const localX = 20 + (CELL_SIZE + 10) * x;
+            const localY = 20 + (CELL_SIZE + 10) * y;
             const cell = game.cells[y * game.width + x];
 
             if (cell.isFlagged()) {
@@ -57,22 +63,22 @@ fn renderGame(game: anytype) void {
 }
 
 fn drawText(text: [*]const u8, x: usize, y: usize, color: r.Color) void {
-    r.DrawText(text, @intCast(x + 2), @intCast(y + 2), 24, r.BLACK);
-    r.DrawText(text, @intCast(x), @intCast(y), 24, color);
+    r.DrawText(text, @intCast(x + 2), @intCast(y + 2), TEXT_SIZE, r.BLACK);
+    r.DrawText(text, @intCast(x), @intCast(y), TEXT_SIZE, color);
 }
 
 fn renderButton(x: usize, y: usize, hidden: bool) void {
     const mouseX = r.GetMouseX();
     const mouseY = r.GetMouseY();
-    const is_mouseover = mouseX >= x and mouseX <= x + 30 and mouseY >= y and mouseY <= y + 30;
+    const is_mouseover = mouseX >= x and mouseX <= x + CELL_SIZE and mouseY >= y and mouseY <= y + CELL_SIZE;
 
     const color = if (!hidden) r.BROWN else if (is_mouseover) r.BEIGE else r.GRAY;
-    rect(@intCast(x), @intCast(y), 30, 30, 2, r.BLACK, color);
+    rect(@intCast(x), @intCast(y), CELL_SIZE, CELL_SIZE, 2, r.BLACK, color);
 }
 
 fn interactGame(game: anytype) !mines.MoveResult {
-    const mX = r.GetMouseX();
-    const mY = r.GetMouseY();
+    const mX: usize = @intCast(r.GetMouseX());
+    const mY: usize = @intCast(r.GetMouseY());
     const left = r.IsMouseButtonReleased(r.MOUSE_BUTTON_LEFT);
     const right = r.IsMouseButtonReleased(r.MOUSE_BUTTON_RIGHT);
 
@@ -81,14 +87,14 @@ fn interactGame(game: anytype) !mines.MoveResult {
 
     // Constrain interaction events to the game board.
     // The minimum here prevents an underflow with usize (<20 - 20)
-    if (mX <= 20 or mY <= 20 or mX > game.width * 40 + 30 or mY > game.height * 40 + 30) return undefined;
+    if (mX <= 20 or mY <= 20 or mX > (game.width * (CELL_SIZE + 10)) + 30 or mY > (game.height * (CELL_SIZE + 10)) + 30) return undefined;
 
     // Convert from screen coords to the game board
-    const gameX: usize = @intCast(@divFloor(mX - 20, 40));
-    const gameY: usize = @intCast(@divFloor(mY - 20, 40));
+    const gameX: usize = @intCast(@divFloor(mX - 20, CELL_SIZE + 10));
+    const gameY: usize = @intCast(@divFloor(mY - 20, CELL_SIZE + 10));
 
     // If the click happened beyond the edge of the game board
-    if (mX > gameX * 40 + 51 or mY > gameY * 40 + 51) return undefined;
+    if (mX > gameX * (CELL_SIZE + 10) + (CELL_SIZE + 21) or mY > gameY * (CELL_SIZE + 10) + (CELL_SIZE + 21)) return undefined;
 
     const pos: mines.Point = .{ .x = gameX, .y = gameY };
     const move = if (left) mines.Move{ .expose = pos } else mines.Move{ .flag = pos };
