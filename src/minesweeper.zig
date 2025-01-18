@@ -132,6 +132,7 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
                         },
                         .empty => |*empty| {
                             empty.hidden = false;
+                            empty.flagged = false;
                             if (!self.minesPlaced) {
                                 self.placeMines(x, y);
                                 self.minesPlaced = true;
@@ -155,6 +156,7 @@ pub fn Minesweeper(comptime _width: comptime_int, comptime _height: comptime_int
 
                                     if (!currentCell.isEmpty()) continue;
                                     currentCell.setHidden(false);
+                                    currentCell.setFlagged(false);
                                     if (currentCell.nearbyMines() > 0) continue;
 
                                     for (neighbors(pos.x, pos.y)) |neighbor| {
@@ -201,6 +203,13 @@ pub const Cell = union(enum) {
         switch (cell.*) {
             .mine => return,
             .empty => |*e| e.visited = v,
+        }
+    }
+
+    pub fn setFlagged(cell: *Cell, f: bool) void {
+        switch (cell.*) {
+            .mine => |*m| m.* = f,
+            .empty => |*e| e.flagged = f,
         }
     }
 
